@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginScreen from './LoginScreen';
@@ -19,6 +19,13 @@ function App() {
   const [showVideo, setShowVideo] = useState(false);
   const [initiateVideo, setInitiateVideo] = useState(false);
 
+  useEffect(() => {
+    fetch('/getLinks')
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
+  }, []);
+
   const handlePopupClose = () => {
     setKeybindPopup(false);
     if (initiateVideo) {
@@ -34,6 +41,8 @@ function App() {
   const handleShowVideo = () => {
     setShowVideo(true);
   };
+
+
 
   return (
     <div>
