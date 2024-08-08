@@ -35,6 +35,13 @@ function VideoView({ videoLink, keybinds, setKeybinds, judgeName, setJudgeName }
   }
 
   useEffect(() => {
+    fetch(`/getClicks/${videoId}`)
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
+  }, [videoId]);
+
+  useEffect(() => {
     if (score !== 0 || scoreList.length > 0) {
       setScoreList((prevScores) => [
         ...prevScores,
