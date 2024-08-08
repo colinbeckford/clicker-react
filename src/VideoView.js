@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import Navbar from './Navbar';
 
-function VideoView({ videoLink, keybinds, setKeybinds }) {
+function VideoView({ videoLink, keybinds, setKeybinds, judgeName, setJudgeName }) {
   const [score, setScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
   const [negativeScore, setNegativeScore] = useState(0);
@@ -27,7 +27,7 @@ function VideoView({ videoLink, keybinds, setKeybinds }) {
         setScore(score - 1);
         break;
       case keybinds.saveScore:
-        console.log(`Score saved: ${score} at time ${Math.floor(currentTime)}`);
+        console.log(scoreList);
         break;
       default:
         break;
@@ -38,7 +38,7 @@ function VideoView({ videoLink, keybinds, setKeybinds }) {
     if (score !== 0 || scoreList.length > 0) {
       setScoreList((prevScores) => [
         ...prevScores,
-        { second: Number(currentTime.toFixed(1)), score: score },
+        { judge: judgeName, link: videoId, second: Number(currentTime.toFixed(1)), score: score },
       ]);
     }
   }, [score]);
@@ -66,7 +66,8 @@ function VideoView({ videoLink, keybinds, setKeybinds }) {
 
   return (
     <div>
-      <Navbar keybinds={keybinds} setKeybinds={setKeybinds}/>
+      <Navbar keybinds={keybinds} setKeybinds={setKeybinds} judgeName={judgeName}
+        setJudgeName={setJudgeName} />
       <div>
         Score: +{positiveScore} -{negativeScore}
       </div>
@@ -74,7 +75,7 @@ function VideoView({ videoLink, keybinds, setKeybinds }) {
         url={videoLink}
         controls
         onProgress={handleProgress}
-        progressInterval={9}
+        progressInterval={7}
       />
     </div>
   );

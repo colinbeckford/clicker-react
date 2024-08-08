@@ -1,15 +1,9 @@
 import React from 'react';
 
-function LoginScreen({ judgeName, setJudgeName, videoLink, setVideoLink, handleKeybindPopup, handleShowVideo }) {
+function LoginScreen({ videoLink, setVideoLink, handleKeybindPopup, handleShowVideo }) {
   return (
     <div>
       <h1>Judge Login</h1>
-      <input
-        type="text"
-        placeholder="Enter judge name"
-        value={judgeName}
-        onChange={(e) => setJudgeName(e.target.value)}
-      />
       <input
         type="text"
         placeholder="Enter YouTube video link"

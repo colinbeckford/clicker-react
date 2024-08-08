@@ -39,8 +39,6 @@ function App() {
     <div>
       {!showVideo && !keybindPopup && (
         <LoginScreen
-          judgeName={judgeName}
-          setJudgeName={setJudgeName}
           videoLink={videoLink}
           setVideoLink={setVideoLink}
           handleKeybindPopup={handleKeybindPopup}
@@ -49,6 +47,8 @@ function App() {
       )}
       {keybindPopup && (
         <KeybindPopup
+          judgeName={judgeName}
+          setJudgeName={setJudgeName}
           keybinds={keybinds}
           setKeybinds={setKeybinds}
           handlePopupClose={handlePopupClose}
@@ -57,6 +57,8 @@ function App() {
       {showVideo && (
         <VideoView
           videoLink={videoLink}
+          judgeName={judgeName}
+          setJudgeName={setJudgeName}
           keybinds={keybinds}
           setKeybinds={setKeybinds}
           setKeybindPopup={setKeybindPopup}
