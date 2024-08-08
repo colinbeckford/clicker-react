@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function KeybindPopup({ keybinds, setKeybinds, handlePopupClose }) {
   const [newKeybinds, setNewKeybinds] = useState(keybinds);
