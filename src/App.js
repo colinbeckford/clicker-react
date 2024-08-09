@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginScreen from './LoginScreen';
 import KeybindPopup from './KeybindPopup';
 import VideoView from './VideoView';
+import Navbar from './Navbar';
 
 function App() {
   const [keybindPopup, setKeybindPopup] = useState(false);
@@ -46,6 +47,8 @@ function App() {
 
   return (
     <div>
+      <Navbar keybinds={keybinds} setKeybinds={setKeybinds} judgeName={judgeName}
+        setJudgeName={setJudgeName} />
       {!showVideo && !keybindPopup && (
         <LoginScreen
           videoLink={videoLink}
