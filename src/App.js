@@ -74,6 +74,7 @@ function App() {
           judgeName={judgeName}
           keybinds={keybinds}
           replayMode={replayMode}
+          setReplayMode={setReplayMode}
         />
       )}
     </div>

@@ -5,7 +5,8 @@ function VideoView({
   videoLink,
   keybinds,
   judgeName,
-  replayMode
+  replayMode,
+  setReplayMode
 }) {
   const [videoId, setVideoId] = useState("");
   const [rawScore, setRawScore] = useState(0);
@@ -66,6 +67,7 @@ function VideoView({
         return response.json();
       })
       .then((data) => {
+        setReplayMode(true);
         console.log('Success:', data);
       })
       .catch((error) => {
@@ -95,7 +97,7 @@ function VideoView({
         })
         .catch((error) => console.error("Error:", error));
     }
-  }, [videoId]);
+  }, [videoId, replayMode]);
 
   useEffect(() => {
     if (selectedJudge != "") {
