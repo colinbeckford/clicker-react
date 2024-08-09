@@ -107,10 +107,11 @@ app.get('/getLinks', (req, res) => {
   });
 });
 
-app.get('/api/getVideoTitles', async (req, res) => {
-  const videoIds = req.query.videoIds.split(',');
+app.post('/api/getVideoTitles', async (req, res) => {
+  const videoIds = req.body.links;
   const apiKey = process.env.YOUTUBE_API_KEY;
   const videoIdsString = videoIds.join(',');
+  console.log(videoIdsString);
   const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIdsString}&key=${apiKey}`;
 
   try {
