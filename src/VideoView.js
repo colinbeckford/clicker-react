@@ -4,13 +4,14 @@ import ReactPlayer from "react-player";
 function VideoView({
   videoLink,
   keybinds,
-  setKeybinds,
   judgeName,
-  setJudgeName,
+  replayMode
 }) {
-  const [score, setScore] = useState(0);
+  const [videoId, setVideoId] = useState("");
+  const [rawScore, setRawScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
   const [negativeScore, setNegativeScore] = useState(0);
+  const [formattedScore, setFormattedScore] = useState("");
   const [doubleClicks, setDoubleClicks] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [scoreList, setScoreList] = useState([]);
@@ -18,34 +19,62 @@ function VideoView({
   const [replayJudgeNames, setReplayJudgeNames] = useState([]);
   const [selectedJudge, setSelectedJudge] = useState("");
   const [selectedScores, setSelectedScores] = useState([]);
-  const [formattedScores, setFormattedScores] = useState([]);
-  const [videoId, setVideoId] = useState("");
+
 
   const handleKeyPress = (event) => {
-    switch (event.key) {
-      case keybinds.plusOne:
-        setPositiveScore(positiveScore + 1);
-        setScore(score + 1);
-        break;
-      case keybinds.plusTwo:
-        setPositiveScore(positiveScore + 2);
-        setScore(score + 2);
-        setDoubleClicks(doubleClicks + 2);
-        break;
-      case keybinds.minusOne:
-        setNegativeScore(negativeScore - 1);
-        setScore(score - 1);
-        break;
-      case keybinds.saveScore:
-        console.log(scoreList);
-        break;
-      default:
-        break;
+    if (!replayMode) {
+      switch (event.key) {
+        case keybinds.plusOne:
+          setPositiveScore(positiveScore + 1);
+          setRawScore(rawScore + 1);
+          break;
+        case keybinds.plusTwo:
+          setPositiveScore(positiveScore + 2);
+          setRawScore(rawScore + 2);
+          setDoubleClicks(doubleClicks + 2);
+          break;
+        case keybinds.minusOne:
+          setNegativeScore(negativeScore - 1);
+          setRawScore(rawScore - 1);
+          break;
+        case keybinds.saveScore:
+          saveScores(scoreList);
+          break;
+        default:
+          break;
+      }
     }
   };
 
+  const saveScores = (scoreList) =>
+  {
+    const requestData = {
+      scores: scoreList, 
+    };
+    console.log(requestData);
+    fetch('/appendClicks', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+      body: JSON.stringify(requestData), 
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error); 
+      });
+  }
+
   useEffect(() => {
-    if (videoId) {
+    if (videoId && replayMode) {
       fetch(`/getClicks/${videoId}`)
         .then((response) => response.json())
         .then((data) => {
@@ -69,30 +98,30 @@ function VideoView({
   }, [videoId]);
 
   useEffect(() => {
-    setSelectedScores(replayScoreList[selectedJudge]);
+    if (selectedJudge != "") {
+      setSelectedScores(replayScoreList[selectedJudge]);
+    }
   }, [selectedJudge]);
 
   useEffect(() => {
-    if (score !== 0 || scoreList.length > 0) {
+    if (rawScore !== 0 || scoreList.length > 0) {
       setScoreList((prevScores) => [
         ...prevScores,
         {
           judge: judgeName,
           link: videoId,
           second: Number(currentTime.toFixed(1)),
-          score: score,
+          score: rawScore,
         },
       ]);
     }
-  }, [score]);
+  }, [rawScore]);
 
   useEffect(() => {
-    setVideoId(getVideoId(videoLink));
+    if (videoLink) {
+      setVideoId(getVideoId(videoLink));
+    }
   }, [videoLink]);
-
-  useEffect(() => {
-    console.log(formattedScores);
-  }, [formattedScores]);
 
   const getScoreAtSecond = (second) => {
     let index = 0;
@@ -116,11 +145,7 @@ function VideoView({
   };
 
   useEffect(() => {
-    console.log(positiveScore, negativeScore);
-  }, [positiveScore, negativeScore]);
-
-  useEffect(() => {
-    if (selectedScores && selectedScores.length > 0 && currentTime > 0) {
+    if (replayMode && selectedScores && selectedScores.length > 0 && currentTime > 0) {
       const closestIndex = selectedScores.findIndex(
         (score) => Number(currentTime.toFixed(1)) <= score.second
       );
@@ -140,7 +165,12 @@ function VideoView({
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [score, keybinds, currentTime]);
+  }, [rawScore, keybinds, currentTime]);
+
+  useEffect(() => {
+    const formatted = `+${positiveScore} -${Math.abs(negativeScore)}`;
+    setFormattedScore(formatted);
+  }, [positiveScore, negativeScore]);
 
   const handleProgress = (state) => {
     setCurrentTime(state.playedSeconds);
@@ -159,20 +189,24 @@ function VideoView({
 
   return (
     <div>
-      <label htmlFor="judgeDropdown">Select Judge: </label>
-      <select
-        id="judgeDropdown"
-        value={selectedJudge}
-        onChange={handleJudgeChange}
-      >
-        {replayJudgeNames.map((judge) => (
-          <option key={judge} value={judge}>
-            {judge}
-          </option>
-        ))}
-      </select>
+      {replayMode ?
+        <div>
+          <label htmlFor="judgeDropdown">Select Judge: </label>
+          <select
+            id="judgeDropdown"
+            value={selectedJudge}
+            onChange={handleJudgeChange}
+          >
+            {replayJudgeNames.map((judge) => (
+              <option key={judge} value={judge}>
+                {judge}
+              </option>
+            ))}
+          </select>
+        </div> : <></>
+      }
       <div>
-        Score: +{positiveScore} {negativeScore}
+        {formattedScore}
       </div>
       <ReactPlayer
         url={videoLink}

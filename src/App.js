@@ -16,7 +16,7 @@ function App() {
     minusOne: '3',
     saveScore: '4',
   });
-
+  const [replayMode, setReplayMode] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [initiateVideo, setInitiateVideo] = useState(false);
 
@@ -36,10 +36,12 @@ function App() {
 
   const handleKeybindPopup = () => {
     setKeybindPopup(true);
+    setReplayMode(false);
     setInitiateVideo(true);
   };
 
   const handleShowVideo = () => {
+    setReplayMode(true);
     setShowVideo(true);
   };
 
@@ -70,10 +72,8 @@ function App() {
         <VideoView
           videoLink={videoLink}
           judgeName={judgeName}
-          setJudgeName={setJudgeName}
           keybinds={keybinds}
-          setKeybinds={setKeybinds}
-          setKeybindPopup={setKeybindPopup}
+          replayMode={replayMode}
         />
       )}
     </div>

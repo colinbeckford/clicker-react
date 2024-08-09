@@ -32,9 +32,10 @@ app.use(bodyParser.json());
 
 // API routes
 app.post('/appendClicks', (req, res) => {
-  const dataArray = req.body.dataArray;
+  const dataArray = req.body.scores;
+  const values = dataArray.map((item) => [item.judge, item.link, item.second, item.score]);
   const insertQuery = 'INSERT INTO 2024clicks (judge, link, second, score) VALUES ?';
-  db.query(insertQuery, [dataArray], (insertErr, result) => {
+  db.query(insertQuery, [values], (insertErr, result) => {
     if (insertErr) {
       console.error('Error inserting data into "2024clicks" table:', insertErr);
       res.status(500).json({ error: 'Internal Server Error' });
