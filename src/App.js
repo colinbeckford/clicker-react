@@ -11,10 +11,10 @@ function App() {
   const [judgeName, setJudgeName] = useState('');
   const [videoLink, setVideoLink] = useState('');
   const [keybinds, setKeybinds] = useState({
-    plusOne: '1',
+    plusOne: 'k',
     plusTwo: '2',
-    minusOne: '3',
-    saveScore: '4',
+    minusOne: 'j',
+    saveScore: '0',
   });
   const [replayMode, setReplayMode] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
