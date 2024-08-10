@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginScreen from './LoginScreen';
 import KeybindPopup from './KeybindPopup';
 import VideoView from './VideoView';
+import VideoList from './VideoList';
 import Navbar from './Navbar';
 
 function App() {
@@ -19,14 +20,7 @@ function App() {
   const [replayMode, setReplayMode] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [initiateVideo, setInitiateVideo] = useState(false);
-
-  useEffect(() => {
-    fetch('/getLinks')
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
-  }, []);
-
+  
   const handlePopupClose = () => {
     setKeybindPopup(false);
     if (initiateVideo) {
@@ -51,6 +45,8 @@ function App() {
     <div>
       <Navbar keybinds={keybinds} setKeybinds={setKeybinds} judgeName={judgeName}
         setJudgeName={setJudgeName} />
+      <VideoList handleKeybindPopup={handleKeybindPopup}
+          handleShowVideo={handleShowVideo} videoLink={videoLink} setVideoLink={setVideoLink} />
       {!showVideo && !keybindPopup && (
         <LoginScreen
           videoLink={videoLink}
@@ -74,7 +70,6 @@ function App() {
           judgeName={judgeName}
           keybinds={keybinds}
           replayMode={replayMode}
-          setReplayMode={setReplayMode}
         />
       )}
     </div>
