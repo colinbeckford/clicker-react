@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import KeybindPopup from './KeybindPopup';
+import VideoList from './VideoList';
 
-function Navbar({ keybinds, setKeybinds, judgeName, setJudgeName }) {
+function Navbar({ keybinds, setKeybinds, judgeName, setJudgeName, videoLink, setVideoLink, handleKeybindPopup, handleShowVideo }) {
     const [isKeybindPopupVisible, setKeybindPopupVisible] = useState(false);
+    const [isVideoListVisible, setVideoListVisible] = useState(false);
 
     const handleSettingsClick = () => {
         setKeybindPopupVisible(true);
@@ -12,11 +14,21 @@ function Navbar({ keybinds, setKeybinds, judgeName, setJudgeName }) {
         setKeybindPopupVisible(false);
     };
 
+    const handleVideoListClick = () => {
+        setVideoListVisible(true);
+    }
+
+    const closeVideoList = () => {
+        setVideoListVisible(false);
+    }
     return (
         <nav>
             <ul>
                 <li>
                     <button onClick={handleSettingsClick}>Settings</button>
+                </li>
+                <li>
+                    <button onClick={handleVideoListClick}>Video List</button>
                 </li>
             </ul>
             {isKeybindPopupVisible && (
@@ -25,6 +37,10 @@ function Navbar({ keybinds, setKeybinds, judgeName, setJudgeName }) {
                     judgeName={judgeName}
                     setJudgeName={setJudgeName}
                     handlePopupClose={closeKeybindPopup} />
+            )}
+            {isVideoListVisible && (
+                <VideoList closeVideoList={closeVideoList} handleKeybindPopup={handleKeybindPopup}
+                handleShowVideo={handleShowVideo} videoLink={videoLink} setVideoLink={setVideoLink} />
             )}
         </nav>
     );
