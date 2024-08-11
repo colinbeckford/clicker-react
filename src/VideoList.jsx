@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import ButtonOptions from './ButtonOptions';
 
 function VideoList({ closeVideoList, handleKeybindPopup, handleShowVideo, videoLink, setVideoLink }) {
-
   const [freestyleList, setFreestyleList] = useState([]);
   const [featuredList, setFeaturedList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetch('/getLinks')
@@ -14,12 +14,7 @@ function VideoList({ closeVideoList, handleKeybindPopup, handleShowVideo, videoL
   }, []);
 
   useEffect(() => {
-    console.log(videoLink);
-  }, [videoLink]);
-
-  useEffect(() => {
     if (freestyleList.length > 0) {
-      console.log(freestyleList);
       const requestData = {
         links: freestyleList.map(item => item.link),
       };
@@ -37,8 +32,7 @@ function VideoList({ closeVideoList, handleKeybindPopup, handleShowVideo, videoL
           return response.json();
         })
         .then((data) => {
-          setFeaturedList(data);
-          console.log('Success:', data);
+          setFeaturedList(data.slice(0, 15)); 
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -46,15 +40,45 @@ function VideoList({ closeVideoList, handleKeybindPopup, handleShowVideo, videoL
     }
   }, [freestyleList]);
 
+  const handleSearch = () => {
+    const requestData = {
+      query: searchQuery,
+    };
+    fetch('/api/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setFeaturedList(data.slice(0, 15)); 
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
   const handleSetFreestyle = (link) => {
     closeVideoList();
     setVideoLink(link);
   }
 
-
-
   return (
     <div>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search YouTube"
+      />
+      <button onClick={handleSearch}>Search</button>
       <ul>
         {
           featuredList.map(item => (

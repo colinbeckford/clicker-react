@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -111,7 +111,6 @@ app.post('/api/getVideoTitles', async (req, res) => {
   const videoIds = req.body.links;
   const apiKey = process.env.YOUTUBE_API_KEY;
   const videoIdsString = videoIds.join(',');
-  console.log(videoIdsString);
   const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIdsString}&key=${apiKey}`;
 
   try {
@@ -128,6 +127,26 @@ app.post('/api/getVideoTitles', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.post('/api/search', async (req, res) => {
+  const searchQuery = req.body.query;
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&key=${apiKey}&type=video&maxResults=15`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+    const data = await response.json();
+    const videos = data.items;
+    const titles = videos.map(video => ({ title: video.snippet.title, link: video.id.videoId }));
+    res.json(titles);
+  } catch (error) {
+    console.error('Error fetching video titles:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 app.get('/getLinks_NYYL', (req, res) => {
   const selectQuery = 'SELECT link, COUNT(DISTINCT judge) AS count FROM 2024nyyl GROUP BY link ORDER BY count DESC';
