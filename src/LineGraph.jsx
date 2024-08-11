@@ -1,73 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
+import { Line } from "react-chartjs-2";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from 'recharts';
+  CategoryScale
+} from "chart.js";
 
-const LineGraph = ({ data }) => {
-  const transformedData = Object.keys(data).map((judge) =>
-    data[judge].map((point) => ({
-      second: point.second,
-      score: point.score,
-      judge: judge,
-    }))
-  );
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale
+);
 
-  const flattenedData = transformedData.flat();
+function LineGraph({ data, onLineClick }) {
+  const chartData = useMemo(() => ({
+    datasets: Object.keys(data).map((judgeName) => ({
+      label: judgeName,
+      data: data[judgeName].map((item) => ({
+        x: item.second,
+        y: item.score,
+      })),
+      fill: false,
+      borderColor: "#" + ((1 << 24) * Math.random() | 0).toString(16),
+    })),
+  }), [data]);
 
-  const maxSecond = Math.max(
-    ...Object.keys(data).flatMap(judge =>
-      data[judge].map(point => point.second)
-    )
-  );
-  const increment = 10;
-  const maxTickValue = Math.ceil(maxSecond / increment) * increment;
-  const xTicks = [];
-  for (let i = 0; i <= maxTickValue; i += increment) {
-    xTicks.push(i);
-  }
+  const options = {
+    onClick: (event, elements) => {
+      if (elements.length > 0) {
+        const datasetIndex = elements[0].datasetIndex;
+        const index = elements[0].index;
+        const judgeName = chartData.datasets[datasetIndex].label;
+        const clickedPoint = chartData.datasets[datasetIndex].data[index];
+        onLineClick(clickedPoint.x, judgeName); // Pass both time and judge name
+      }
+    },
+    scales: {
+      x: {
+        type: "linear",
+        position: "bottom",
+        title: {
+          display: true,
+          text: "Time (seconds)",
+        },
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Score",
+        },
+      },
+    },
+  };
 
-  return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart
-        data={flattenedData}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="second"
-          ticks={xTicks}
-          domain={[0, maxTickValue]}
-          tickFormatter={(tick) => tick} 
-        />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        {Object.keys(data).map((judge, index) => (
-          <Line
-            key={judge}
-            type="monotone"
-            dataKey="score"
-            data={transformedData[index]}
-            name={judge}
-            stroke={`hsl(${index * 60}, 70%, 50%)`}
-            activeDot={{ r: 8 }}
-          />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
-  );
-};
+  return <Line data={chartData} options={options} />;
+}
 
 export default LineGraph;

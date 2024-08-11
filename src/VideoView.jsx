@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import ReactPlayer from "react-player";
 import LineGraph from "./LineGraph";
 
-function VideoView({
-  videoLink,
-  keybinds,
-  judgeName,
-  replayMode
-}) {
+function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
   const [videoId, setVideoId] = useState("");
   const [rawScore, setRawScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
@@ -20,7 +15,9 @@ function VideoView({
   const [replayJudgeNames, setReplayJudgeNames] = useState([]);
   const [selectedJudge, setSelectedJudge] = useState("");
   const [selectedScores, setSelectedScores] = useState([]);
+  const [seeking, setSeeking] = useState(false);
 
+  const playerRef = useRef(null);
 
   const handleKeyPress = (event) => {
     if (!replayMode) {
@@ -47,31 +44,30 @@ function VideoView({
     }
   };
 
-  const saveScores = (scoreList) =>
-  {
+  const saveScores = (scoreList) => {
     const requestData = {
-      scores: scoreList, 
+      scores: scoreList,
     };
-    fetch('/appendClicks', {
-      method: 'POST', 
+    fetch("/appendClicks", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json', 
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestData), 
+      body: JSON.stringify(requestData),
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
-        console.log('Success:', data);
+        console.log("Success:", data);
       })
       .catch((error) => {
-        console.error('Error:', error); 
+        console.error("Error:", error);
       });
-  }
+  };
 
   useEffect(() => {
     if (videoId && replayMode) {
@@ -145,14 +141,20 @@ function VideoView({
   };
 
   useEffect(() => {
-    if (replayMode && selectedScores && selectedScores.length > 0 && currentTime > 0) {
+    if (
+      replayMode &&
+      selectedScores &&
+      selectedScores.length > 0 &&
+      currentTime > 0
+    ) {
       const closestIndex = selectedScores.findIndex(
         (score) => Number(currentTime.toFixed(1)) <= score.second
       );
 
       if (closestIndex !== -1) {
         if (
-          Number(currentTime.toFixed(1)) === selectedScores[closestIndex].second
+          Number(currentTime.toFixed(1)) ===
+          selectedScores[closestIndex].second
         ) {
           getScoreAtSecond(Number(currentTime.toFixed(1)));
         }
@@ -173,12 +175,26 @@ function VideoView({
   }, [positiveScore, negativeScore]);
 
   const handleProgress = (state) => {
-    const time = typeof state === 'object' ? state.playedSeconds : state;
-    setCurrentTime(time);
+    if (!seeking) { 
+      const time = typeof state === "object" ? state.playedSeconds : state;
+      setCurrentTime(time);
+    }
   };
 
-  const handleJudgeChange = (event) => {
-    setSelectedJudge(event.target.value);
+  const handleSeek = (seconds) => {
+    setSeeking(true);
+    if (playerRef.current) {
+      playerRef.current.seekTo(seconds, "seconds");
+    }
+  };
+
+  const handlePlay = () => {
+    setSeeking(false);
+  };
+
+  const handleLineClick = (judge, second) => {
+    setSelectedJudge(judge);
+    handleSeek(second);
   };
 
   const getVideoId = (url) => {
@@ -188,15 +204,22 @@ function VideoView({
     return match ? match[1] : null;
   };
 
+  const memoizedLineGraph = useMemo(
+    () => (
+      <LineGraph data={replayScoreList} onLineClick={handleLineClick} />
+    ),
+    [replayScoreList]
+  );
+
   return (
     <div>
-      {replayMode ?
+      {replayMode ? (
         <div>
           <label htmlFor="judgeDropdown">Select Judge: </label>
           <select
             id="judgeDropdown"
             value={selectedJudge}
-            onChange={handleJudgeChange}
+            onChange={(e) => setSelectedJudge(e.target.value)}
           >
             {replayJudgeNames.map((judge) => (
               <option key={judge} value={judge}>
@@ -204,19 +227,21 @@ function VideoView({
               </option>
             ))}
           </select>
-        </div> : <></>
-      }
-      <div>
-        {formattedScore}
-      </div>
+        </div>
+      ) : (
+        <></>
+      )}
+      <div>{formattedScore}</div>
       <ReactPlayer
+        ref={playerRef}
         url={videoLink}
         controls
         onProgress={handleProgress}
         onSeek={handleProgress}
         progressInterval={40}
+        onPlay={handlePlay}
       />
-      <LineGraph data={replayScoreList} />
+      {memoizedLineGraph}
     </div>
   );
 }
