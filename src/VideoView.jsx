@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactPlayer from "react-player";
+import LineGraph from "./LineGraph";
 
 function VideoView({
   videoLink,
@@ -215,6 +216,7 @@ function VideoView({
         onSeek={handleProgress}
         progressInterval={40}
       />
+      <LineGraph data={replayScoreList} />
     </div>
   );
 }
