@@ -4,7 +4,7 @@ import ButtonOptions from './ButtonOptions';
 function LoginScreen({ videoLink, setVideoLink, handleKeybindPopup, handleShowVideo }) {
   return (
     <div>
-      <h1>Judge Login</h1>
+      <h1>Scales Clicker</h1>
       <input
         type="text"
         placeholder="Enter YouTube video link"
