@@ -16,6 +16,7 @@ function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
   const [selectedJudge, setSelectedJudge] = useState("");
   const [selectedScores, setSelectedScores] = useState([]);
   const [seeking, setSeeking] = useState(false);
+  const [playing, setPlaying] = useState(false); 
 
   const playerRef = useRef(null);
 
@@ -156,6 +157,7 @@ function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
           Number(currentTime.toFixed(1)) ===
           selectedScores[closestIndex].second
         ) {
+          console.log(Number(currentTime.toFixed(1)));
           getScoreAtSecond(Number(currentTime.toFixed(1)));
         }
       }
@@ -170,12 +172,13 @@ function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
   }, [rawScore, keybinds, currentTime]);
 
   useEffect(() => {
+    console.log("Formatted score use effect hit");
     const formatted = `+${positiveScore} -${Math.abs(negativeScore)}`;
     setFormattedScore(formatted);
   }, [positiveScore, negativeScore]);
 
   const handleProgress = (state) => {
-    if (!seeking) { 
+    if (!seeking) {
       const time = typeof state === "object" ? state.playedSeconds : state;
       setCurrentTime(time);
     }
@@ -185,11 +188,14 @@ function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
     setSeeking(true);
     if (playerRef.current) {
       playerRef.current.seekTo(seconds, "seconds");
+      setCurrentTime(seconds);
+      setPlaying(true); 
     }
   };
 
   const handlePlay = () => {
     setSeeking(false);
+    setPlaying(true); 
   };
 
   const handleLineClick = (judge, second) => {
@@ -238,7 +244,8 @@ function VideoView({ videoLink, keybinds, judgeName, replayMode }) {
         controls
         onProgress={handleProgress}
         onSeek={handleProgress}
-        progressInterval={40}
+        progressInterval={10}
+        playing={playing} 
         onPlay={handlePlay}
       />
       {memoizedLineGraph}

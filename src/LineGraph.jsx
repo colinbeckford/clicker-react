@@ -41,7 +41,7 @@ function LineGraph({ data, onLineClick }) {
         const index = elements[0].index;
         const judgeName = chartData.datasets[datasetIndex].label;
         const clickedPoint = chartData.datasets[datasetIndex].data[index];
-        onLineClick(clickedPoint.x, judgeName); // Pass both time and judge name
+        onLineClick(judgeName, clickedPoint.x); 
       }
     },
     scales: {
